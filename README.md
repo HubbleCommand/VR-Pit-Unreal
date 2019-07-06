@@ -1,11 +1,12 @@
 # VR Pit Unreal
 Project code for the Unreal Engine version of the VR Pit. Made in 4.22.
 
-##Packaged project
+## Packaged project
 A packaged, executable version of the project can be found at:
+
 https://sourceforge.net/projects/vrpit-unreal/
 
-###Controls
+### Controls
 - Escape closes the program
 - F11 changes between Windowed and Fullscreen
 - R starts the trials
