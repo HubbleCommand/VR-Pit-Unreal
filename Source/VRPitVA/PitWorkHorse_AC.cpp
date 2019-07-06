@@ -146,6 +146,32 @@ UPitWorkHorse_AC::UPitWorkHorse_AC()
 
 	// ...
 }
+
+void UPitWorkHorse_AC::ToggleActor(AActor* toHide, bool toggle) {
+	toHide->SetActorHiddenInGame(!toggle);
+	toHide->SetActorEnableCollision(toggle);
+	toHide->SetActorTickEnabled(toggle);
+}
+void UPitWorkHorse_AC::CD1() {
+	ToggleActor(Number1, true);
+	ToggleActor(Number2, false);
+	ToggleActor(Number3, false);
+}
+void UPitWorkHorse_AC::CD2() {
+	ToggleActor(Number1, false);
+	ToggleActor(Number2, true);
+	ToggleActor(Number3, false);
+}
+void UPitWorkHorse_AC::CD3() {
+	ToggleActor(Number1, false);
+	ToggleActor(Number2, false);
+	ToggleActor(Number3, true);
+}
+void UPitWorkHorse_AC::CDAll() {
+	ToggleActor(Number1, false);
+	ToggleActor(Number2, false);
+	ToggleActor(Number3, false);
+}
 void UPitWorkHorse_AC::ExecuteTrials()
 {
 	int trials = pitdata.NumberOfTrials;
@@ -155,6 +181,29 @@ void UPitWorkHorse_AC::ExecuteTrials()
 	//Trials
 	for (a = 0; a <= trials; a++)	//for each trials
 	{
+		//Countdown timers
+		//3
+		FTimerHandle TimerHandlePre3;
+		FTimerDelegate TimerDelPre3;
+		TimerDelPre3.BindUFunction(this, FName("CD3"));
+		GetWorld()->GetTimerManager().SetTimer(TimerHandlePre3, TimerDelPre3, (pitdata.DurationPre[a] + sum_time - 3), false);
+
+		FTimerHandle TimerHandlePre2;
+		FTimerDelegate TimerDelPre2;
+		TimerDelPre2.BindUFunction(this, FName("CD2"));
+		GetWorld()->GetTimerManager().SetTimer(TimerHandlePre2, TimerDelPre2, (pitdata.DurationPre[a] + sum_time - 2), false);
+
+		FTimerHandle TimerHandlePre1;
+		FTimerDelegate TimerDelPre1;
+		TimerDelPre1.BindUFunction(this, FName("CD1"));
+		GetWorld()->GetTimerManager().SetTimer(TimerHandlePre1, TimerDelPre1, (pitdata.DurationPre[a] + sum_time - 1), false);
+
+		FTimerHandle TimerHandlePreA;
+		FTimerDelegate TimerDelPreA;
+		TimerDelPreA.BindUFunction(this, FName("CDAll"));
+		GetWorld()->GetTimerManager().SetTimer(TimerHandlePreA, TimerDelPreA, (pitdata.DurationPre[a] + sum_time), false);
+
+		//Build pit timers
 		FTimerHandle TimerHandlePre;
 		FTimerDelegate TimerDelPre;
 		TimerDelPre.BindUFunction(this, FName("BuildPit"), pitdata.Depth[a], pitdata.Platforms[a], pitdata.Falling[a]);
@@ -282,6 +331,10 @@ void UPitWorkHorse_AC::BeginPlay()
 		else    {UE_LOG(LogTemp, Warning, TEXT("Oops! Couldn't properly store the pit data, or the file wasn't written properly!"));}
 	}
 	else { UE_LOG(LogTemp, Error, TEXT("Could not load trial data file!")); }
+	//Hide numbers
+	ToggleActor(Number1, false);
+	ToggleActor(Number2, false);
+	ToggleActor(Number3, false);
 }
 
 // Called every frame
@@ -314,7 +367,8 @@ int UPitWorkHorse_AC::SetUpPort() {
 
 	if (commPort == INVALID_HANDLE_VALUE)
 	{
-		std::cout << "Error opening serial port! \n\n";
+		//std::cout << "Error opening serial port! \n\n";
+		UE_LOG(LogTemp, Error, TEXT("Error opening serial port! \n\n"));
 		return -1;
 	}
 	else { std::cout << "Set up serial port... \n\n"; }
@@ -324,15 +378,18 @@ int UPitWorkHorse_AC::SetUpPort() {
 	dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
 	if (!GetCommState(commPort, &dcbSerialParams))
 	{
-		std::cout << "Error getting comm state!\n";
+		//std::cout << "Error getting comm state!\n";
+		UE_LOG(LogTemp, Error, TEXT("Error opening serial port! \n\n"));
 	}
 	if (!BuildCommDCB(L"baud=9600 parity=n data=8 stop=1", &dcbSerialParams))
 	{
-		std::cout << "Error building comm state!\n";
+		//std::cout << "Error building comm state!\n";
+		UE_LOG(LogTemp, Error, TEXT("Error opening serial port! \n\n"));
 	}
 	if (!SetCommState(commPort, &dcbSerialParams))
 	{
-		std::cout << "Error setting up DCB!\n";
+		//std::cout << "Error setting up DCB!\n";
+		UE_LOG(LogTemp, Error, TEXT("Error opening serial port! \n\n"));
 		return -1;
 	}
 	else { std::cout << "Set up DCB... \n\n"; }
@@ -346,10 +403,11 @@ int UPitWorkHorse_AC::SetUpPort() {
 	commTimeOut.WriteTotalTimeoutMultiplier = 2;
 	if (!SetCommTimeouts(commPort, &commTimeOut))
 	{
-		std::cout << "Error setting Timeouts!\n";
+		//std::cout << "Error setting Timeouts!\n";
+		UE_LOG(LogTemp, Error, TEXT("Error opening serial port! \n\n"));
 		return -1;
 	}
-	else { std::cout << "Set up timeouts...\n\n"; }
+	else { /*std::cout << "Set up timeouts...\n\n";*/ UE_LOG(LogTemp, Error, TEXT("Error opening serial port! \n\n")); }
 
 
 	//Sending Data

@@ -26,6 +26,9 @@ public:
 	int SetUpPort();
 	int PortOutput(float duration, int32 output);
 
+	//Hide/unhide numbers
+	void ToggleActor(AActor* toHide, bool toggle);
+
 	//Other
 	UFUNCTION(BlueprintCallable)
 	void ExecuteTrials();
@@ -38,6 +41,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Fade();
+
+	UFUNCTION(BlueprintCallable)
+	void CD1();
+	UFUNCTION(BlueprintCallable)
+	void CD2();
+	UFUNCTION(BlueprintCallable)
+	void CD3();
+	UFUNCTION(BlueprintCallable)
+	void CDAll();
 
 	//Don't worry about intellisense warning, ResetPlayer() IS implemented, but in Blueprints
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="Output")
@@ -67,4 +79,13 @@ private:
 
 	UPROPERTY(EditAnywhere, Meta = (DisplayName = "Floor Barrier"))
 	AActor* FloorBarrier;
+	
+	UPROPERTY(EditAnywhere)
+	AActor* Number3;
+
+	UPROPERTY(EditAnywhere)
+	AActor* Number2;
+
+	UPROPERTY(EditAnywhere)
+	AActor* Number1;
 };
