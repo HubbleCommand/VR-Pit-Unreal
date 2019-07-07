@@ -4,6 +4,9 @@
 #include <iostream>
 #include <stdio.h>
 #include <string>
+
+//For GEngine
+#include "Engine.h"
 //NEED #include <windows.h>, equivalent in UE4 is:
 #include "Windows/MinWindows.h"
 #include "Engine/World.h"
@@ -23,6 +26,7 @@
 class UPitWorkHorse_AC::UPitData
 {
 public:
+	bool CanExecute;
 	int NumberOfTrials;
 	TArray<bool> Falling;
 	TArray<FString> Platforms;
@@ -174,58 +178,64 @@ void UPitWorkHorse_AC::CDAll() {
 }
 void UPitWorkHorse_AC::ExecuteTrials()
 {
-	int trials = pitdata.NumberOfTrials;
-	int a = 0;
+	if (pitdata.CanExecute) {
+		UE_LOG(LogTemp, Warning, TEXT("Can execute trials! Setting up timers for execution!"));
+		int trials = pitdata.NumberOfTrials;
+		int a = 0;
 
-	float sum_time = 0;
-	//Trials
-	for (a = 0; a <= trials; a++)	//for each trials
-	{
-		//Countdown timers
-		//3
-		FTimerHandle TimerHandlePre3;
-		FTimerDelegate TimerDelPre3;
-		TimerDelPre3.BindUFunction(this, FName("CD3"));
-		GetWorld()->GetTimerManager().SetTimer(TimerHandlePre3, TimerDelPre3, (pitdata.DurationPre[a] + sum_time - 3), false);
+		float sum_time = 0;
+		//Trials
+		for (a = 0; a <= trials; a++)	//for each trials
+		{
+			//Countdown timers
+			//3
+			FTimerHandle TimerHandlePre3;
+			FTimerDelegate TimerDelPre3;
+			TimerDelPre3.BindUFunction(this, FName("CD3"));
+			GetWorld()->GetTimerManager().SetTimer(TimerHandlePre3, TimerDelPre3, (pitdata.DurationPre[a] + sum_time - 3), false);
 
-		FTimerHandle TimerHandlePre2;
-		FTimerDelegate TimerDelPre2;
-		TimerDelPre2.BindUFunction(this, FName("CD2"));
-		GetWorld()->GetTimerManager().SetTimer(TimerHandlePre2, TimerDelPre2, (pitdata.DurationPre[a] + sum_time - 2), false);
+			FTimerHandle TimerHandlePre2;
+			FTimerDelegate TimerDelPre2;
+			TimerDelPre2.BindUFunction(this, FName("CD2"));
+			GetWorld()->GetTimerManager().SetTimer(TimerHandlePre2, TimerDelPre2, (pitdata.DurationPre[a] + sum_time - 2), false);
 
-		FTimerHandle TimerHandlePre1;
-		FTimerDelegate TimerDelPre1;
-		TimerDelPre1.BindUFunction(this, FName("CD1"));
-		GetWorld()->GetTimerManager().SetTimer(TimerHandlePre1, TimerDelPre1, (pitdata.DurationPre[a] + sum_time - 1), false);
+			FTimerHandle TimerHandlePre1;
+			FTimerDelegate TimerDelPre1;
+			TimerDelPre1.BindUFunction(this, FName("CD1"));
+			GetWorld()->GetTimerManager().SetTimer(TimerHandlePre1, TimerDelPre1, (pitdata.DurationPre[a] + sum_time - 1), false);
 
-		FTimerHandle TimerHandlePreA;
-		FTimerDelegate TimerDelPreA;
-		TimerDelPreA.BindUFunction(this, FName("CDAll"));
-		GetWorld()->GetTimerManager().SetTimer(TimerHandlePreA, TimerDelPreA, (pitdata.DurationPre[a] + sum_time), false);
+			FTimerHandle TimerHandlePreA;
+			FTimerDelegate TimerDelPreA;
+			TimerDelPreA.BindUFunction(this, FName("CDAll"));
+			GetWorld()->GetTimerManager().SetTimer(TimerHandlePreA, TimerDelPreA, (pitdata.DurationPre[a] + sum_time), false);
 
-		//Build pit timers
-		FTimerHandle TimerHandlePre;
-		FTimerDelegate TimerDelPre;
-		TimerDelPre.BindUFunction(this, FName("BuildPit"), pitdata.Depth[a], pitdata.Platforms[a], pitdata.Falling[a]);
-		GetWorld()->GetTimerManager().SetTimer(TimerHandlePre, TimerDelPre, (pitdata.DurationPre[a] + sum_time), false);
-		sum_time += pitdata.DurationPre[a];
+			//Build pit timers
+			FTimerHandle TimerHandlePre;
+			FTimerDelegate TimerDelPre;
+			TimerDelPre.BindUFunction(this, FName("BuildPit"), pitdata.Depth[a], pitdata.Platforms[a], pitdata.Falling[a]);
+			GetWorld()->GetTimerManager().SetTimer(TimerHandlePre, TimerDelPre, (pitdata.DurationPre[a] + sum_time), false);
+			sum_time += pitdata.DurationPre[a];
 
-		//fade floor back in
-		FTimerHandle TimerHandleFade;
-		FTimerDelegate TimerDelFade;
-		TimerDelFade.BindUFunction(this, FName("Fade"));
-		UE_LOG(LogTemp, Warning, TEXT("Got here"));
-		GetWorld()->GetTimerManager().SetTimer(TimerHandleFade, TimerDelFade, (pitdata.DurationExposure[a] + sum_time - 1), false);
+			//fade floor back in
+			FTimerHandle TimerHandleFade;
+			FTimerDelegate TimerDelFade;
+			TimerDelFade.BindUFunction(this, FName("Fade"));
+			UE_LOG(LogTemp, Warning, TEXT("Got here"));
+			GetWorld()->GetTimerManager().SetTimer(TimerHandleFade, TimerDelFade, (pitdata.DurationExposure[a] + sum_time - 1), false);
 
-		//destroy pit
-		FTimerHandle TimerHandleExp;
-		FTimerDelegate TimerDelExp;
-		TimerDelExp.BindUFunction(this, FName("DestroyPit"));
-		GetWorld()->GetTimerManager().SetTimer(TimerHandleExp, TimerDelExp, (pitdata.DurationExposure[a] + sum_time), false);
-		sum_time += pitdata.DurationExposure[a];
+			//destroy pit
+			FTimerHandle TimerHandleExp;
+			FTimerDelegate TimerDelExp;
+			TimerDelExp.BindUFunction(this, FName("DestroyPit"));
+			GetWorld()->GetTimerManager().SetTimer(TimerHandleExp, TimerDelExp, (pitdata.DurationExposure[a] + sum_time), false);
+			sum_time += pitdata.DurationExposure[a];
 
-		//port output
-		sum_time += pitdata.DurationPost[a];
+			//port output
+			sum_time += pitdata.DurationPost[a];
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Cannot execute trials!"));
 	}
 }
 
@@ -305,16 +315,15 @@ void UPitWorkHorse_AC::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Get Game Instance & data
+	UVRPit_GI_CPP* GameInstance = Cast<UVRPit_GI_CPP>(GetWorld()->GetGameInstance());
+	FString path2 = GameInstance->TrialDataFilePath;
+	UE_LOG(LogTemp, Warning, TEXT("Typed path: %s"), *path2);
 	//Gets the owner
 	Pit = GetOwner();
 
 	FString Result;
-	//FString godpleaseohy = "C:/Users/Sasha Poirier/Desktop/test.txt";
-	FString godpleaseohy = "C:/Users/Sasha Poirier/Desktop/test.txt";
-	FString path = FPaths::ConvertRelativePathToFull(FPaths::GameDir());
-	godpleaseohy = path + "Content/ExtraDat/test.txt";
-	UE_LOG(LogTemp, Warning, TEXT("Path: %s"), *path);
-	const TCHAR * Filename = *godpleaseohy;
+	const TCHAR * Filename = *path2;
 	uint32 VerifyFlags = 0;
 	if (FFileHelper::LoadFileToString(Result, Filename))	{
 		UE_LOG(LogTemp, Warning, TEXT("Huzzah! Got file contents! \n Contents: %s"), *Result);
@@ -327,10 +336,11 @@ void UPitWorkHorse_AC::BeginPlay()
 			pitdata = Pits;
 			Pits.LogElements();
 			//ExecuteTrials();
+			pitdata.CanExecute = true;
 		}
-		else    {UE_LOG(LogTemp, Warning, TEXT("Oops! Couldn't properly store the pit data, or the file wasn't written properly!"));}
+		else    {UE_LOG(LogTemp, Warning, TEXT("Oops! Couldn't properly store the pit data, or the file wasn't written properly!")); pitdata.CanExecute = false;}
 	}
-	else { UE_LOG(LogTemp, Error, TEXT("Could not load trial data file!")); }
+	else { UE_LOG(LogTemp, Error, TEXT("Could not load trial data file!")); pitdata.CanExecute = false;}
 	//Hide numbers
 	ToggleActor(Number1, false);
 	ToggleActor(Number2, false);

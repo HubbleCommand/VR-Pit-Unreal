@@ -7,6 +7,7 @@
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "Runtime/Core/Public/Misc/FileHelper.h"
+#include "VRPit_GI_CPP.h"
 #include "PitWorkHorse_AC.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
