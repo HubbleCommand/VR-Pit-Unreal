@@ -1,6 +1,11 @@
 # VR Pit Unreal
 Project code for the Unreal Engine version of the VR Pit. Made in 4.22.
 
+## Use of timers
+In the Unity version of the project, Coroutines were used to handle the timing and sequence of the trials.
+
+For the Unreal version, I used Timers (in PitWorkHorse_AC.cpp) to achieve the same effect. However, there is another system in Unreal that is much closer to Unity's Coroutines: AsyncTasks. AsyncTasks weren't used as there was nothing to do during the routines except wait, then execute some functions, which is exactly what Unreal's Timers were used to achieve. However, if there is a need, eventually, to execute other functions while the Timers are running, it would probably be better to look at using AsyncTasks.
+
 ## Packaged project
 A packaged, executable version of the project can be found at:
 
